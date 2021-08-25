@@ -129,12 +129,13 @@ dmypy.json
 .pyre/
 
 # app specific
-lambda/redis/
-lambda/redis-3.5.3.dist-info/
-lambda/psutil/
-lambda/psutil-5.8.0.dist-info/
+lambda/*/redis/
+lambda/*/redis-*/
+lambda/*/psutil/
+lambda/*/psutil-*/
 lambda/*.zip
 .terraform/
 .terraform.*
 terraform.tfstate
 terraform.tfstate.*
+terraform/terraform.tfvars

@@ -4,11 +4,12 @@ import socket
 import time
 import threading
 
-r = redis.Redis(host='')
 UPDATE_INTERVAL = 10.0
 
+r = redis.Redis(host='')
+hostname = socket.gethostname()
+
 def store_metrics():
-    hostname = socket.gethostname()
     cpu_times = psutil.cpu_times()
     virtual_memory = psutil.virtual_memory()
 
