@@ -133,6 +133,10 @@ lambda/*/redis/
 lambda/*/redis-*/
 lambda/*/psutil/
 lambda/*/psutil-*/
+lambda/*/deprecated/
+lambda/*/deprecated-*/
+lambda/*/wrapt/
+lambda/*/wrapt-*/
 lambda/*.zip
 .terraform/
 .terraform.*

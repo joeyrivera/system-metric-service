@@ -1,3 +1,7 @@
+variable "aws_profile" {
+  description = "AWS credentials profile to use"
+  type        = string
+}
 variable "vpc_id" {
   description = "VPN to use"
   type        = string

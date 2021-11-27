@@ -10,7 +10,7 @@ terraform {
 }
 
 provider "aws" {
-  profile = "default"
+  profile = var.aws_profile
   region  = "us-east-1"
 }
 
@@ -42,6 +42,24 @@ resource "aws_security_group" "ec2_ssh" {
     description      = "SSH from public"
     from_port        = 22
     to_port          = 22
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+    protocol         = "tcp"
+    self             = true
+  }]
+}
+
+resource "aws_security_group" "ec2_redis" {
+  name        = "allow_redis"
+  description = "Allow Redis"
+  vpc_id      = var.vpc_id
+
+  ingress = [{
+    prefix_list_ids  = []
+    security_groups  = []
+    description      = "Redis from EC2"
+    from_port        = 6379
+    to_port          = 6379
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
     protocol         = "tcp"
@@ -102,7 +120,7 @@ resource "aws_elasticache_replication_group" "metrics_redis" {
   number_cache_clusters         = 2
   parameter_group_name          = "default.redis6.x"
   port                          = 6379
-  security_group_ids            = [var.vpc_security_group_id]
+  security_group_ids            = [var.vpc_security_group_id, "${aws_security_group.ec2_redis.id}"]
   subnet_group_name             = aws_elasticache_subnet_group.elasticache_metric_subnet_group.name
   tags = {
     Name = "ResourceMetricService"
@@ -139,8 +157,10 @@ resource "aws_apigatewayv2_api" "resource_metric_service" {
 }
 
 resource "aws_apigatewayv2_stage" "resource_metric_service_stage" {
-  api_id = aws_apigatewayv2_api.resource_metric_service.id
-  name   = "$default"
+  api_id      = aws_apigatewayv2_api.resource_metric_service.id
+  name        = "$default"
+  auto_deploy = true
+
   tags = {
     Name = "ResourceMetricService"
   }
@@ -180,7 +200,10 @@ resource "aws_apigatewayv2_deployment" "first_deploy" {
   description = "First deployment"
 
   triggers = {
-    redeployment = "${timestamp()}"
+    redeployment = sha1(join(",", tolist([
+      jsonencode(aws_apigatewayv2_integration.lambda_integration_get),
+      jsonencode(aws_apigatewayv2_route.get_shard_health_route),
+    ])))
   }
 
   lifecycle {

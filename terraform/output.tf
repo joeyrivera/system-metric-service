@@ -13,3 +13,7 @@ output "reader_endpoint_address" {
 output "api_lambda_source" {
   value = aws_lambda_permission.lambda_permission.source_arn
 }
+
+output "api_gateway_address" {
+  value = aws_apigatewayv2_stage.resource_metric_service_stage.invoke_url
+}
